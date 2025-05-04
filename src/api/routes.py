@@ -6,11 +6,18 @@ from api.models import db, User
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required
+
 api = Blueprint('api', __name__)
 
-# Allow CORS requests to this API
-CORS(api)
 
+# Allow CORS requests to this API
+# CORS(api)
+
+def password_match(user, password):
+    return user.password == password
 
 @api.route('/hello', methods=['POST', 'GET'])
 def handle_hello():
@@ -20,3 +27,25 @@ def handle_hello():
     }
 
     return jsonify(response_body), 200
+
+
+@api.route("/token", methods=["POST"])
+def create_token():
+    email = request.json.get("email", None)
+    password = request.json.get("password", None)
+    if email != "test@gmail.com" or password != "test":
+        return jsonify({"msg": "Bad email or password"}), 401
+
+    access_token = create_access_token(identity=email)
+    return jsonify(access_token=access_token)
+
+@api.route('/user', methods=['POST'])
+def create_user():
+    request_body = request.get_json()
+    user = User(name=request_body['name'], email=request_body['email'],
+                password=request_body['password'], is_active=True)
+    db.session.add(user)
+    db.session.commit()
+    email = request_body['email']
+    access_token = create_access_token(identity=email)
+    return jsonify(user.serialize()), 200
