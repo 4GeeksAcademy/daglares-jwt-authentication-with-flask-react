@@ -5,12 +5,17 @@ import {
     createRoutesFromElements,
     Route,
 } from "react-router-dom";
+
+import React from "react";
+import PrivateRoute from "./components/PrivateRoute";
+
 import { Layout } from "./pages/Layout";
 import { Home } from "./pages/Home";
 import { Single } from "./pages/Single";
 import { Demo } from "./pages/Demo";
 import { Signup } from "./pages/Signup";
 import { Login } from "./pages/Login";
+import { Protected } from "./pages/Protected";
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
@@ -29,6 +34,15 @@ export const router = createBrowserRouter(
         <Route path="/demo" element={<Demo />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+
+        {/* Private Route: Only accessible if the user is authenticated. */}  
+                <Route path="/protected" element={
+            <PrivateRoute>
+              <Protected />
+            </PrivateRoute>
+          }
+        />
+
       </Route>
     )
 );

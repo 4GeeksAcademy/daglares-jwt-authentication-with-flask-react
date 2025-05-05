@@ -1,11 +1,10 @@
-import { Navigate } from "react-router-dom";
+// Importing necessary libraries and hooks
+import React from "react";
 
-const Protected = ({ children }) => {
-  const token = localStorage.getItem("token");
-
-  return token ? children : <Navigate to="/login" replace />;
+export const Protected = () => {
+  return (
+    <div className="container">
+      <h1>Esta es una página protegida con token!🤫</h1>
+    </div>
+  );
 };
-
-export default Protected;
-// This component checks if a token exists in local storage. If it does, it renders the children components.
-// If not, it redirects the user to the login page using the Navigate component from react-router-dom.

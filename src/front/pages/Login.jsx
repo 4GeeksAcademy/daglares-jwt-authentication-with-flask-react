@@ -25,13 +25,14 @@ export const Login = () => {
         if (res.ok) {
         
             localStorage.setItem("token", data.access_token);
+            // Set user data in global state
             dispatch({ type: "SET_USER", payload: {
                 email: data.email,
                 name: data.name,
                 last_name: data.last_name
             }});
             alert("Login exitoso");
-            navigate("/"); 
+            navigate("/protected"); // Redirect to protected route
         } else {
             alert(data.msg || "Error en login");
         }
