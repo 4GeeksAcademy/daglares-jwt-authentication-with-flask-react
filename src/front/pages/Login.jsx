@@ -40,7 +40,7 @@ export const Login = () => {
 
     return (
         <div className="container text-center d-flex flex-column justify-content-center align-items-center">
-            <h2>Sign In</h2>
+            <h2>Login</h2>
             <form onSubmit={handleLogin} className="col-6">
                 <div className="mb-3 text-start">
                     <label htmlFor="exampleInputEmail1" className="form-label">Email address</label>

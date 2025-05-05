@@ -17,9 +17,9 @@ export const Navbar = () => {
 				</Link>
 				<div className="ml-auto">
 					<Link to="/login">
-						<button className="btn btn-primary">Login</button>
+						<button className="btn btn-primary me-2">Login</button>
 					</Link>
-					<button onClick={handleLogout}>
+					<button className="btn btn-danger" onClick={handleLogout}>
 						Cerrar sesión
 					</button>
 				</div>
