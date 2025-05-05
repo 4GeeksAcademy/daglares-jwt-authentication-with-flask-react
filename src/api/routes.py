@@ -5,6 +5,8 @@ from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, User
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
+from werkzeug.security import check_password_hash, generate_password_hash
+import traceback
 
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
@@ -28,27 +30,71 @@ def handle_hello():
 
     return jsonify(response_body), 200
 
+# @api.route("/token", methods=["POST"])
+# def create_token():
+#     # …autenticas al user…
+#     user = User.query.filter_by(email=email).first()
+#     access_token = create_access_token(identity=user.id)
+#     return jsonify({
+#       "access_token": access_token,
+#       "id":          user.id,
+#       "email":       user.email,
+#       "name":        user.name,
+#       "last_name":   user.last_name
+#     }), 200
+
 
 @api.route("/token", methods=["POST"])
 def create_token():
-    email = request.json.get("email", None)
-    password = request.json.get("password", None)
-    if email != "test@gmail.com" or password != "test":
+    data = request.get_json() or {}
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        return jsonify({"msg": "Email and password are required"}), 400
+
+    user = User.query.filter_by(email=email).first()
+
+    if not user or not check_password_hash(user.password, password):
         return jsonify({"msg": "Bad email or password"}), 401
 
-    access_token = create_access_token(identity=email)
-    return jsonify(access_token=access_token)
+    access_token = create_access_token(identity=user.id)
+    return jsonify(access_token=access_token,
+      id=user.id,
+      email=user.email,
+      name=user.name,
+      last_name=user.last_name), 200
 
 @api.route('/user', methods=['POST'])
 def create_user():
-    request_body = request.get_json()
-    user = User(name=request_body['name'], email=request_body['email'],
-                password=request_body['password'], is_active=True)
-    db.session.add(user)
-    db.session.commit()
-    email = request_body['email']
-    access_token = create_access_token(identity=email)
-    return jsonify(user.serialize()), 200
+    try:
+        data = request.get_json() or {}
+        name      = data.get('name')
+        last_name = data.get('last_name')   # corrige aquí el typo
+        email     = data.get('email')
+        password  = data.get('password')
+
+        if not name or not email or not password:
+            return jsonify({"msg": "Name, email and password are required"}), 400
+
+        if User.query.filter_by(email=email).first():
+            return jsonify({"msg": "Email already registered"}), 409
+
+        hashed_pw = generate_password_hash(password)
+
+        user = User(name=name, last_name=last_name, email=email, password=hashed_pw, is_active=True)
+
+        db.session.add(user)
+        db.session.commit()
+
+        return jsonify(user.serialize()), 201
+
+    except Exception as e:
+        # Esto imprime la traza completa en la consola de Flask
+        traceback.print_exc()
+        # Y devuelve un JSON para que el frontend no trate de parsear HTML
+        return jsonify({"msg": "Internal server error", "error": str(e)}), 500
+
 
 @api.route("/protected", methods=["GET"])
 @jwt_required()

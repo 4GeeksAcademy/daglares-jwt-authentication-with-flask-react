@@ -12,7 +12,7 @@ export const Login = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
 
-        const res = await fetch("https://fantastic-acorn-wrg5wrwvvjrq39v65-3001.app.github.dev/api/token", {
+        const res = await fetch('/api/token', {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -25,14 +25,15 @@ export const Login = () => {
         if (res.ok) {
         
             localStorage.setItem("token", data.access_token);
-            // Set user data in global state
+
             dispatch({ type: "SET_USER", payload: {
                 email: data.email,
                 name: data.name,
                 last_name: data.last_name
             }});
+            dispatch({ type: "set_token", payload: data.access_token });
             alert("Login exitoso");
-            navigate("/protected"); // Redirect to protected route
+            navigate("/protected");
         } else {
             alert(data.msg || "Error en login");
         }
